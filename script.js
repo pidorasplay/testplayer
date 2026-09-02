@@ -1,21 +1,45 @@
+let allAnime = [];
 let currentAnime = null;
 let currentEpisode = 1;
 
 async function loadAnimeData() {
   try {
     const response = await fetch('data/anime.json');
-    const data = await response.json();
-    currentAnime = data[0]; // For now, pick the first one
-    renderEpisodeList(currentAnime);
+    allAnime = await response.json();
+    populateAnimeSelector();
     
     // Check for last watched
-    const lastWatched = localStorage.getItem('last_watched_anime');
-    if (lastWatched) {
-        // Logic to restore state
+    const lastWatchedAnimeId = localStorage.getItem('last_watched_anime');
+    if (lastWatchedAnimeId) {
+        const anime = allAnime.find(a => a.anime_id == lastWatchedAnimeId);
+        if (anime) {
+            selectAnime(anime.anime_id);
+            document.getElementById('anime-selector').value = anime.anime_id;
+        }
     }
   } catch (error) {
     console.error('Error loading anime data:', error);
   }
+}
+
+function populateAnimeSelector() {
+    const selector = document.getElementById('anime-selector');
+    allAnime.forEach(anime => {
+        const option = document.createElement('option');
+        option.value = anime.anime_id;
+        option.textContent = anime.title;
+        selector.appendChild(option);
+    });
+    
+    selector.onchange = (e) => selectAnime(e.target.value);
+}
+
+function selectAnime(animeId) {
+    currentAnime = allAnime.find(a => a.anime_id == animeId);
+    if (currentAnime) {
+        localStorage.setItem('last_watched_anime', animeId);
+        renderEpisodeList(currentAnime);
+    }
 }
 
 function renderEpisodeList(anime) {
@@ -32,7 +56,6 @@ function renderEpisodeList(anime) {
 
 function loadEpisode(animeId, episodeId) {
     currentEpisode = episodeId;
-    localStorage.setItem('last_watched_anime', animeId);
     
     // Update player source
     const stream = `videos/${animeId}/${episodeId}/index.m3u8`;

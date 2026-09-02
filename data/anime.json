@@ -4,5 +4,11 @@
     "title": "Одинокий рокер",
     "total_episodes": 12,
     "available_episodes": 2
+  },
+  {
+    "anime_id": 2,
+    "title": "Другое аниме",
+    "total_episodes": 5,
+    "available_episodes": 5
   }
 ]
